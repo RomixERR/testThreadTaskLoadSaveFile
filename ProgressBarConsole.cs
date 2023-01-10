@@ -15,7 +15,6 @@ namespace testThreadTaskLoadSaveFile
 
         static ProgressBarConsole()
         {
-            cancellationTokenSource = new CancellationTokenSource();
             init();
         }
 
@@ -51,6 +50,7 @@ namespace testThreadTaskLoadSaveFile
 
         public static void ShowWaitStart(string msg = "wait")
         {
+            cancellationTokenSource = new CancellationTokenSource();
             taskShowWait = Task.Factory.StartNew(ShowWaiting, cancellationTokenSource.Token);
         }
 
