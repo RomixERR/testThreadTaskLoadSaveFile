@@ -17,14 +17,41 @@ namespace testThreadTaskLoadSaveFile
         public static void OnePart()
         {
             Console.WriteLine("Start One Part");
+            List<Thread> threads = new List<Thread>();
+            int sum = 0;
+            object forLock= new object();
 
-            //List<Thread> threads = new List<Thread>();
-
+            for (int i = 0; i < 12; i++)
+            {
+                Thread thread = new Thread(() => {
+                    string A;
+                    for (int ii = 0; ii < 10; ii++)
+                    {
+                        lock(forLock)
+                        {
+                            sum += ii;
+                            if (sum == 42) A = "       <--- amazing!!!"; else A = "";
+                            Console.WriteLine($"My id is {Thread.CurrentThread.ManagedThreadId}, ii={ii}, sum now {sum} {A}");
+                        }
+                        Thread.Sleep(100+ii*10);
+                    }
+                });
+                threads.Add(thread);
+            }
+            foreach (var item in threads)
+            {
+                item.Start();
+            }
+            foreach (var item in threads)
+            {
+                item.Join();
+            }
 
 
 
             Console.WriteLine("End One Part (Press key)");
             Console.ReadKey();
+            Console.Clear();
         }
 
         public static void TwoPart()
@@ -41,10 +68,5 @@ namespace testThreadTaskLoadSaveFile
             Console.WriteLine("End Two Part (Press key)");
             Console.ReadKey();
         }
-
-
-
     }
-
-
 }
