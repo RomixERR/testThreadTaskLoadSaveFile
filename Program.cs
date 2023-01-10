@@ -18,6 +18,7 @@ namespace testThreadTaskLoadSaveFile
         {
             Console.WriteLine("Start One Part");
             List<Thread> threads = new List<Thread>();
+            FakeUsersLite.FakeUser fu = new FakeUsersLite.FakeUser(FakeUsersLite.FakeUser.Egender.Female);
             int sum = 0;
             object forLock= new object();
 
@@ -31,7 +32,10 @@ namespace testThreadTaskLoadSaveFile
                         {
                             sum += ii;
                             if (sum == 42) A = "       <--- amazing!!!"; else A = "";
-                            Console.WriteLine($"My id is {Thread.CurrentThread.ManagedThreadId}, ii={ii}, sum now {sum} {A}");
+                            Console.WriteLine(
+                                $"My id is " +
+                                $"{Thread.CurrentThread.ManagedThreadId,-4}, {Thread.CurrentThread.Name,-31}, " +
+                                $"ii={ii,2}, sum = {sum} {A}");
                         }
                         Thread.Sleep(100+ii*10);
                     }
@@ -40,6 +44,7 @@ namespace testThreadTaskLoadSaveFile
             }
             foreach (var item in threads)
             {
+                item.Name = fu.GetFullName();
                 item.Start();
             }
             foreach (var item in threads)
