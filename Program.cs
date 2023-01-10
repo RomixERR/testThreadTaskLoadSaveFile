@@ -35,39 +35,42 @@ namespace testThreadTaskLoadSaveFile
         private DBClass DB { get; set; }
         private long Memory;
         private FakeUser FakeUser = new FakeUser();
+        private string S;
 
         public void SaveFile()
         {
-            //StreamWriter writer = new StreamWriter("bazatest.txt");
-            //writer.Close();
+            Console.WriteLine($"Start SerializeObject");
             CancellationTokenSource tokenSource = new CancellationTokenSource();
+            DateTime t1 = DateTime.Now;
             Task ShowWaitingTask = Task.Factory.StartNew(ShowWaiting, tokenSource.Token);
             Task SerializeTask = Task.Factory.StartNew(Serialize);
             SerializeTask.Wait();
-            try
-            {
-                tokenSource.Cancel(true);
-                ShowWaitingTask.Wait();
-            }
-            catch (AggregateException e)
-            {
-                if (ShowWaitingTask.IsCanceled)
-                {
-                    SerializeTask.Dispose();
-                    ShowWaitingTask.Dispose();
-                    tokenSource.Dispose();
-                }
-            }
+            DateTime t2 = DateTime.Now;
+            tokenSource.Cancel();
+            ShowWaitingTask.Wait();
             ProgressBarConsole.NewLineAfterShowWait();
+
+            Console.WriteLine($"SerializeObject ms={(t2 - t1).TotalMilliseconds}");
+            Console.WriteLine($"S Lenght = {((float)S.Length) / 1000000}M");
+
+            SerializeTask.Dispose();
+            ShowWaitingTask.Dispose();
+            tokenSource.Dispose();
+
+            Console.WriteLine($"Start StreamWriter");
+            t1 = DateTime.Now;
+            StreamWriter writer = new StreamWriter("bazatest.txt");
+            Task task = writer.WriteAsync(S);
+            task.Wait();///
+            t2 = DateTime.Now;
+            Console.WriteLine($"StreamWriter ms={(t2 - t1).TotalMilliseconds}");
+            writer.Close();
+
         }
 
         private void Serialize()
         {
-            string S;
-            DateTime t = DateTime.Now;
             S = JsonConvert.SerializeObject(DB);
-            Console.WriteLine($"SerializeObject ms={(DateTime.Now - t).TotalMilliseconds}");
-            Console.WriteLine($"S Lenght = {((float)S.Length) / 1000000}M");
         }
 
         private void ShowWaiting(object o)
@@ -75,7 +78,7 @@ namespace testThreadTaskLoadSaveFile
             CancellationToken token = (CancellationToken)o;
             while(true)
             {
-                token.ThrowIfCancellationRequested();
+                if (token.IsCancellationRequested) return;
                 ProgressBarConsole.ShowWait();
                 Thread.Sleep(100);
             }
