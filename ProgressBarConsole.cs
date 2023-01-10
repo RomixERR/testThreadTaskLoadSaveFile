@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace testThreadTaskLoadSaveFile
 {
@@ -8,8 +10,12 @@ namespace testThreadTaskLoadSaveFile
         private static int waitNum;
         private static char wnch = (char)91;
         private static int wnch2 = 93;
+        private static Task taskShowWait;
+        private static CancellationTokenSource cancellationTokenSource;
+
         static ProgressBarConsole()
         {
+            cancellationTokenSource = new CancellationTokenSource();
             init();
         }
 
@@ -35,7 +41,53 @@ namespace testThreadTaskLoadSaveFile
             Show((int)p);
         }
 
-        public static void ShowWait(string msg = "wait")
+        public static void NewLineAfterShow()
+        {
+            init();
+            Console.WriteLine();
+        }
+
+
+
+        public static void ShowWaitStart(string msg = "wait")
+        {
+            taskShowWait = Task.Factory.StartNew(ShowWaiting, cancellationTokenSource.Token);
+        }
+
+        public static void ShowWaitStop(string msg = "ok")
+        {
+            cancellationTokenSource.Cancel();
+            taskShowWait.Wait();
+            taskShowWait.Dispose();
+            cancellationTokenSource.Dispose();
+        }
+
+
+        private static void NewLineAfterShowWait(string msg = "ok")
+        {
+            init();
+            Console.CursorLeft = 0;
+            Console.Write($"{msg}                                     ");
+            Console.WriteLine();
+        }
+
+
+        private static void ShowWaiting(object o)
+        {
+            CancellationToken token = (CancellationToken)o;
+            while (true)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    NewLineAfterShowWait();
+                    return;
+                }
+                    ShowWait();
+                Thread.Sleep(100);
+            }
+        }
+
+        private static void ShowWait(string msg = "wait")
         {
             Console.CursorLeft = 0;
             Console.Write($"{msg} {(char)waitNum}");
@@ -43,19 +95,9 @@ namespace testThreadTaskLoadSaveFile
             if (waitNum > wnch2) waitNum = wnch;
         }
 
-        public static void NewLineAfterShow()
-        {
-            init();
-            Console.WriteLine();
-        }
+    
 
-        public static void NewLineAfterShowWait(string msg = "ok")
-        {
-            init();
-            Console.CursorLeft = 0;
-            Console.Write($"{msg}        ");
-            Console.WriteLine();
-        }
+        
 
         private static void init()
         {

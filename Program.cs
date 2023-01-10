@@ -40,22 +40,20 @@ namespace testThreadTaskLoadSaveFile
         public void SaveFile()
         {
             Console.WriteLine($"Start SerializeObject");
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
             DateTime t1 = DateTime.Now;
-            Task ShowWaitingTask = Task.Factory.StartNew(ShowWaiting, tokenSource.Token);
             Task SerializeTask = Task.Factory.StartNew(Serialize);
+            ProgressBarConsole.ShowWaitStart();
             SerializeTask.Wait();
+            ProgressBarConsole.ShowWaitStop();
             DateTime t2 = DateTime.Now;
-            tokenSource.Cancel();
-            ShowWaitingTask.Wait();
-            ProgressBarConsole.NewLineAfterShowWait();
+            
 
             Console.WriteLine($"SerializeObject ms={(t2 - t1).TotalMilliseconds}");
             Console.WriteLine($"S Lenght = {((float)S.Length) / 1000000}M");
 
             SerializeTask.Dispose();
-            ShowWaitingTask.Dispose();
-            tokenSource.Dispose();
+            
+
 
             Console.WriteLine($"Start StreamWriter");
             t1 = DateTime.Now;
@@ -73,16 +71,7 @@ namespace testThreadTaskLoadSaveFile
             S = JsonConvert.SerializeObject(DB);
         }
 
-        private void ShowWaiting(object o)
-        {
-            CancellationToken token = (CancellationToken)o;
-            while(true)
-            {
-                if (token.IsCancellationRequested) return;
-                ProgressBarConsole.ShowWait();
-                Thread.Sleep(100);
-            }
-        }
+        
 
 
 
