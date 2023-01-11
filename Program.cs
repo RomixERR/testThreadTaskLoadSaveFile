@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace testThreadTaskLoadSaveFile
 {
@@ -10,8 +11,14 @@ namespace testThreadTaskLoadSaveFile
     {
         static void Main(string[] args)
         {
+            PartAsync();
+            Console.ReadKey();
+            //MatrixPart();
+            //Console.ReadKey();
             OnePart();
+            Console.ReadKey();
             TwoPart();
+            Console.ReadKey();
         }
 
         public static void OnePart()
@@ -55,8 +62,6 @@ namespace testThreadTaskLoadSaveFile
 
 
             Console.WriteLine("End One Part (Press key)");
-            Console.ReadKey();
-            Console.Clear();
         }
 
         public static void TwoPart()
@@ -71,7 +76,50 @@ namespace testThreadTaskLoadSaveFile
             repo.SaveFile();
 
             Console.WriteLine("End Two Part (Press key)");
-            Console.ReadKey();
+        }
+
+        public class borshch { public string Color { get; set; } }
+
+        public static async void PartAsync()
+        {
+            Task<borshch> borshchTask1 = Task.Run(() => PourBorshch("красный"));
+            Task<borshch> borshchTask2 = Task.Run(() => PourBorshch("белый"));
+            Console.WriteLine("Запущены задачи приготовления");
+            var a = await borshchTask1;
+            var b = await borshchTask2;
+            Console.WriteLine($"Приготовлены {a.Color} и {b.Color}");
+        }
+
+        public static async Task<borshch> PourBorshch(string color)
+        {
+            Thread.CurrentThread.Name = color;
+            Console.WriteLine($"Начало готовки {color} борщ, Thread Name = {Thread.CurrentThread.Name}, Thread ID = {Thread.CurrentThread.ManagedThreadId}");
+            for (int i = 0; i <= 10; i++)
+            {
+                Thread.Sleep(100);
+                Console.WriteLine($"Готовим {color} борщ - {i*10}%");
+            }
+            Console.WriteLine($"Окончание готовки {color} борщ");
+            borshch b = new borshch() { Color = color };
+            return b;
+        }
+
+        public static void MatrixPart()
+        {
+            //Console.WriteLine("Start Matrix part");
+            //Matrix A = new Matrix(4, 2, nameof(A));
+            //Matrix B = new Matrix(2, 3, nameof(B));
+            //A.GenerateRandomMatrixInt();
+            //B.GenerateRandomMatrixInt();
+            //A.ShowMatrix();
+            //Console.WriteLine(A.SummAllElements());
+            //Console.WriteLine();
+            //B.ShowMatrix();
+            //Console.WriteLine(B.SummAllElements());
+            //Console.WriteLine();
+
+            //Console.WriteLine("End Matrix part");
         }
     }
+
 }
